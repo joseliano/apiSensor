@@ -1,0 +1,149 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+
+<div class="form-group" ng-app="myApp" ng-controller="customersCtrl">
+    <div class="form-group">
+        <span class="row">
+            <div class="border">
+                <div class="col-md-6 border">
+                    <canvas id="mChart1" style="padding: 0;margin: auto;display: block; "> </canvas>
+                </div>
+                <div class="col-md-4 border">
+                    <canvas id="mChart2" style="padding: 0;margin: auto;display: block; "> </canvas>
+                </div>
+
+                <div class="col-md-2 border">
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                            <th>País</th>
+                            <th>Total</th>
+                        </tr>
+                        <tr ng-repeat="pais in ngPais">
+                            <td><a>{{pais.Nome}}</a></td>
+                            <td><a>{{pais.Valor}}</a></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </span>
+    </div>
+
+    <div class="form-group">
+        <span class="row">
+            <div class="col-md-4 border">
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Sensor</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr ng-repeat="sensor in ngSensor">
+                        <td><a>{{sensor.Nome}}</a></td>
+                        <td><a>{{sensor.Valor}}</a></td>
+                    </tr>
+                </table>
+            </div>
+        </span>
+    </div>
+</div>
+
+@Scripts.Render("~/Scripts/angular.min.js")
+<script>
+    var app = angular.module('myApp', []);
+    var timeTamp = 30000; // valor de tempo apra atualização
+
+    /* recuperar a url ativa*/
+    function getAbsolutePath() {
+        var loc = window.location;
+        var pathName = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+        return loc.href.substring(0, loc.href.length - ((loc.pathname + loc.search + loc.hash).length - pathName.length));
+    }
+   // getGrafico("pie", "Pais", "Total por Pais", "#mChart2", "GraficoPais");
+    /* thread para atualizar dados da pagina*/
+    var auto_atualiza = setInterval(function () {
+       getGrafico("bar", "Região", "Total por Região", "#mChart1", "GraficoRegiao");
+       getGrafico("pie", "Pais", "Total por Pais", "#mChart2", "GraficoPais");
+    }, timeTamp);
+
+    //grafico que atualização por regiao
+    function getGrafico(pType, pLabel, pTitle, pDiv, Ulr) {
+        $.ajax({
+            type: "POST",
+            url: "/Home/" + Ulr,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (mems) {
+                var aData = mems;
+                var aLabels = aData[0];
+                var aDatasets1 = aData[1];
+                var dataT = {
+                    labels: aLabels,
+                    datasets: [{
+                        label: pLabel,
+                        data: aDatasets1,
+                        fill: false,
+                        backgroundColor: ["rgba(54, 162, 235, 0.2)", "rgba(255, 99, 132, 0.2)", "rgba(255, 159, 64, 0.2)", "rgba(255, 205, 86, 0.2)", "rgba(75, 192, 192, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(201, 203, 207, 0.2)"],
+                        borderColor: ["rgb(54, 162, 235)", "rgb(255, 99, 132)", "rgb(255, 159, 64)", "rgb(255, 205, 86)", "rgb(75, 192, 192)", "rgb(153, 102, 255)", "rgb(201, 203, 207)"],
+                        borderWidth: 1
+                    }]
+                };
+
+                var ctx = $(pDiv).get(0).getContext("2d");
+                var myNewChart = new Chart(ctx, {
+                    type: pType,
+                    data: dataT,
+                    options: {
+                        responsive: true,
+                        title: { display: true, text: pTitle },
+                        legend: { position: 'bottom' },
+                        scales: {
+                            xAxes: [{ gridLines: { display: false }, display: true, scaleLabel: { display: false, labelString: '' } }],
+                            yAxes: [{ gridLines: { display: false }, display: true, scaleLabel: { display: false, labelString: '' }, ticks: { stepSize: 50, beginAtZero: true } }]
+                        },
+                    }
+                });
+            }
+        });
+    }
+
+    app.controller('customersCtrl', function ($scope, $http) {
+
+        $scope.pesqPais = function () {
+            console.log(getAbsolutePath() + "Home/listPais");
+          
+            $http({
+                method: "GET",
+                url: "/Home/listPais"
+            }).then(function mySuccess(response) {
+                console.log(response.data);
+                $scope.ngPais = response.data[0];
+            }, function myError(response) {
+                console.log("Erro", response);
+            }
+            )
+        };
+
+        $scope.pesqSensor = function () {
+            console.log(getAbsolutePath() + "Home/listSensor");
+
+            $http({
+                method: "GET",
+                url: "/Home/listSensor"
+            }).then(function mySuccess(response) {
+                console.log(response.data);
+                $scope.ngSensor = response.data[0];
+            }, function myError(response) {
+                console.log("Erro", response);
+            }
+            )
+        };
+      
+        var auto_atualiza = setInterval(function () {
+            $scope.pesqSensor();
+            $scope.pesqPais();
+        }, timeTamp);
+
+    });
+
+</script>

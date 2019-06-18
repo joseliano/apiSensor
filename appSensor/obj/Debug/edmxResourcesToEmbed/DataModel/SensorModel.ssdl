@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="SensorModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="Pais">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Nome" Type="varchar" MaxLength="50" />
+    <Property Name="Ativo" Type="nchar" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="Regiao">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Nome" Type="varchar" MaxLength="50" />
+    <Property Name="Ativo" Type="char" MaxLength="1" />
+  </EntityType>
+  <EntityType Name="Sensor">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Nome" Type="nchar" MaxLength="10" />
+    <Property Name="idRegiao" Type="int" />
+    <Property Name="idPais" Type="int" />
+  </EntityType>
+  <EntityType Name="Sensor_valor">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="IdSensor" Type="int" />
+    <Property Name="Valor" Type="numeric" Precision="18" Scale="0" />
+    <Property Name="TimesTamp" Type="numeric" Precision="18" Scale="0" />
+    <Property Name="DataCadastrado" Type="smalldatetime" />
+  </EntityType>
+  <Association Name="FK_Sensor_Pais">
+    <End Role="Pais" Type="Self.Pais" Multiplicity="0..1" />
+    <End Role="Sensor" Type="Self.Sensor" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Pais">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Sensor">
+        <PropertyRef Name="idPais" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Sensor_Regiao">
+    <End Role="Regiao" Type="Self.Regiao" Multiplicity="0..1" />
+    <End Role="Sensor" Type="Self.Sensor" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Regiao">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Sensor">
+        <PropertyRef Name="idRegiao" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Sensor_valor_Sensor">
+    <End Role="Sensor" Type="Self.Sensor" Multiplicity="0..1" />
+    <End Role="Sensor_valor" Type="Self.Sensor_valor" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Sensor">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Sensor_valor">
+        <PropertyRef Name="IdSensor" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="SensorModelStoreContainer">
+    <EntitySet Name="Pais" EntityType="Self.Pais" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Regiao" EntityType="Self.Regiao" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Sensor" EntityType="Self.Sensor" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Sensor_valor" EntityType="Self.Sensor_valor" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK_Sensor_Pais" Association="Self.FK_Sensor_Pais">
+      <End Role="Pais" EntitySet="Pais" />
+      <End Role="Sensor" EntitySet="Sensor" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Sensor_Regiao" Association="Self.FK_Sensor_Regiao">
+      <End Role="Regiao" EntitySet="Regiao" />
+      <End Role="Sensor" EntitySet="Sensor" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Sensor_valor_Sensor" Association="Self.FK_Sensor_valor_Sensor">
+      <End Role="Sensor" EntitySet="Sensor" />
+      <End Role="Sensor_valor" EntitySet="Sensor_valor" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>
